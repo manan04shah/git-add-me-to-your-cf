@@ -160,6 +160,9 @@ def createTranslatedAV(videopath, source_lang, target_langs):
     print("Final compilation successful.")
 
     print("Your translated video is ready in final_output.mp4.")
+    
+    final_path = "../audiotranslate/finaloutput/final-output.mp4"
+    return final_path
 
 
 createTranslatedAV("../videos/python.mp4", "en", ["hi"])

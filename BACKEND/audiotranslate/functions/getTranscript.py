@@ -26,7 +26,7 @@ r = sr.Recognizer()
 for i in range(0, total_duration):
     with sr.AudioFile(transcribed_audio_file_name) as source:
         audio = r.record(source, offset=i*60, duration=60)
-    f = open("../transcriptions/transcription.txt", "a")
+    f = open("../transcriptions/transcription.txt", "w")
     f.write(r.recognize_google(audio))
     f.write(" ")
 f.close()
