@@ -3,23 +3,31 @@ import easyocr
 import numpy as np
 import os
 from PIL import Image, ImageDraw, ImageFont
-import deepl
+from googletrans import Translator
 
-deepl_api_key = os.getenv('DEEPL_API_KEY')
-translator = deepl.Translator('16f7a326-13d2-42df-b379-3c6b56c0acd7:fx')
 
-def translate(text, source, target):
-    sources = ["BG", "CS", "DA", "DE", "EL", "EN", "ES", "ET", "FI", "FR", "HU", "ID", "IT", "JA", "KO", "LT", "LV", "NB", "NL", "PL", "PT", "RO", "RU", "SK", "SL", "SV", "TR", "UK", "ZH"]
-    targets = ["BG", "CS", "DA", "DE", "EL", "EN-GB", "EN-US", "ES", "ET", "FI", "FR", "HU", "ID", "IT", "JA", "KO", "LT", "LV", "NB", "NL", "PL", "PT-BR", "PT-PT", "RO", "RU", "SK", "SL", "SV", "TR", "UK", "ZH"]
-    if source not in sources:
-        return False
-    if target not in targets:
-        return False
-    result = translator.translate_text(text, source_lang=source, target_lang=target)
-    if type(text) is list:
-        return [r.text for r in result]
-    else:
-        return str(result.text)
+# import deepl
+# deepl_api_key = os.getenv('DEEPL_API_KEY')
+# translator = deepl.Translator('16f7a326-13d2-42df-b379-3c6b56c0acd7:fx')
+
+# def translate(text, source, target):
+#     sources = ["BG", "CS", "DA", "DE", "EL", "EN", "ES", "ET", "FI", "FR", "HU", "ID", "IT", "JA", "KO", "LT", "LV", "NB", "NL", "PL", "PT", "RO", "RU", "SK", "SL", "SV", "TR", "UK", "ZH"]
+#     targets = ["BG", "CS", "DA", "DE", "EL", "EN-GB", "EN-US", "ES", "ET", "FI", "FR", "HU", "ID", "IT", "JA", "KO", "LT", "LV", "NB", "NL", "PL", "PT-BR", "PT-PT", "RO", "RU", "SK", "SL", "SV", "TR", "UK", "ZH"]
+#     if source not in sources:
+#         return False
+#     if target not in targets:
+#         return False
+#     result = translator.translate_text(text, source_lang=source, target_lang=target)
+#     if type(text) is list:
+#         return [r.text for r in result]
+#     else:
+#         return str(result.text)
+
+
+def translate_text(text,sourcelang,targetlang):
+    translator = Translator()
+    translated_text = translator.translate(text, src=sourcelang, dest=targetlang)
+    return translated_text.text
 
 
 def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
@@ -58,11 +66,18 @@ def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
     previous_frame = None
     previous_translated_frame = None
 
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+
     while True:
+
         ret, frame = cap.read()
         if not ret:
             break
         frame_count += 1
+
+        print(f"Processing frame {frame_count} of {total_frames} ({round(frame_count / total_frames * 100, 2)}%)", end="\r")
+
         if frame_count % skip_frames != 0:
             if previous_translated_frame is not None:
                 out.write(previous_translated_frame)
@@ -72,7 +87,7 @@ def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
             previous_frame = frame.copy()
             continue
         result = reader.readtext(frame)
-        print(result)
+        # print(result)
         translated_frame = frame.copy()
         for detection in result:
             top_left = tuple(map(int, detection[0][0]))
@@ -88,7 +103,7 @@ def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
             if(text == ''):
                 continue
             else:
-                text1 = translate(str(text),source_lang,target_lang)
+                text1 = translate_text(str(text),source_lang,target_lang)
             font = ImageFont.truetype(font_path, font_size)
             draw.text((top_left[0], top_left[1]), text1, font=font, fill=(255-bg_color[0], 255-bg_color[1], 255-bg_color[2]))
             translated_frame = np.array(pil_image)
@@ -99,7 +114,7 @@ def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
             break
 
     cap.release()
-    out.release()
+    out.release()   
     cv2.destroyAllWindows()
 
-translate_video('french2.mp4', 'FR', 'EN-GB', 2,True)
+translate_video('french2.mp4', 'fr', 'gu', 3,True)
