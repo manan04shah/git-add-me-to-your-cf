@@ -85,7 +85,10 @@ def translate_video(input_path,source_lang , target_lang, mode):
             font_size = int(text_height / 2)
             draw = ImageDraw.Draw(pil_image)
             text = detection[1]
-            text1 = translate(str(text),source_lang,target_lang)
+            if(text == ''):
+                continue
+            else:
+                text1 = translate(str(text),source_lang,target_lang)
             font = ImageFont.truetype(font_path, font_size)
             draw.text((top_left[0], top_left[1]), text1, font=font, fill=(255-bg_color[0], 255-bg_color[1], 255-bg_color[2]))
             translated_frame = np.array(pil_image)
