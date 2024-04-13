@@ -34,13 +34,13 @@ def translate_text_google(text,sourcelang,targetlang):
 def translate_video(input_path, source_lang, target_lang, mode, GPU=False):
 
     mode = int(mode)
-    if mode == 0:
+    if mode == 1:
         scale_factor = 1  # 60 fps -> 60 fps , retain all frames
-    elif mode == 1:
-        scale_factor = 0.1  # 60 fps -> 6 fps , retain 1 frame every 10 frames
     elif mode == 2:
-        scale_factor = 0.05  # 60 fps -> 3 fps , retain 1 frame every 20 frames
+        scale_factor = 0.1  # 60 fps -> 6 fps , retain 1 frame every 10 frames
     elif mode == 3:
+        scale_factor = 0.05  # 60 fps -> 3 fps , retain 1 frame every 20 frames
+    elif mode == 4:
         scale_factor = 0.01  # 60 fps -> 1 fps , retain 1 frame every 60 frames
     else:
         print("Error: Invalid mode")
@@ -57,6 +57,7 @@ def translate_video(input_path, source_lang, target_lang, mode, GPU=False):
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
     reader = easyocr.Reader(['en', 'fr', 'es', 'de'], gpu=GPU)
+    font_path = 'BACKEND/arial-unicode-ms.ttf'
 
     if not cap.isOpened():
         print("Error: Couldn't open the video file")
@@ -94,7 +95,7 @@ def translate_video(input_path, source_lang, target_lang, mode, GPU=False):
             bottom_right = tuple(map(int, detection[0][2]))
             bg_color = np.mean(
                 frame[top_left[1]-1:top_left[1]+1, bottom_right[0]:bottom_right[0]+1], axis=(0, 1))
-            bg_color = tuple(map(int, bg_color))
+            bg_color = tuple(int(value) if not np.isnan(value) else 0 for value in bg_color)
             cv2.rectangle(translated_frame, top_left,
                           bottom_right, bg_color, -1)
             pil_image = Image.fromarray(translated_frame)
@@ -126,4 +127,4 @@ def translate_video(input_path, source_lang, target_lang, mode, GPU=False):
     out.release()   
     cv2.destroyAllWindows()
 
-translate_video('french.mp4', 'FR', 'TA', 3,True)
+# translate_video('french.mp4', 'FR', 'TA', 3,True)

@@ -1,7 +1,9 @@
 import createTTSFiles as ttscreate
 from moviepy.editor import *
 import os
-
+#Import functions directory
+import sys
+sys.path.append('BACKEND')
 
 #Helper function to convert returned list into a list of audios supported by main function
 def convertToAudioList(tts_audio_files):
@@ -39,8 +41,8 @@ def split_video_with_audio_clips(video_path, audio_clips_data):
         clips.append(clip)
     
     for i in range(len(clips)):
-        clips[i].write_videofile(f"../videofiles\\output{i}.mp4")
-        videoclips.append(f"../videofiles\\output{i}.mp4")
+        clips[i].write_videofile(f"../videofiles/output{i}.mp4")
+        videoclips.append(f"../videofiles/output{i}.mp4")
 
     video.close()
 
@@ -96,7 +98,7 @@ def combine_subclips(audio_files, video_files):
     
     #Write each clip to a new video file
     for i, clip in enumerate(combined_clips):
-        clip.write_videofile(f"../combinedfiles\\output{i}.mp4")
+        clip.write_videofile(f"../combinedfiles/output{i}.mp4")
 
     return combined_clips
 
@@ -106,13 +108,15 @@ def make_final_compilation(combined_clips):
     return final_clip
 
 def createTranslatedAV(videopath, source_lang, target_langs):
+    print(os.getcwd())
+
     #Delete everything in combinedfiles, videofiles, audiofiles
     for file in os.listdir("../combinedfiles"):
-        os.remove(f"../combinedfiles\\{file}")
+        os.remove(f"../combinedfiles/{file}")
     for file in os.listdir("../videofiles"):
-        os.remove(f"../videofiles\\{file}")
+        os.remove(f"../videofiles/{file}")
     for file in os.listdir("../audiofiles"):
-        os.remove(f"../audiofiles\\{file}")
+        os.remove(f"../audiofiles/{file}")
     
 
     # Extracting the audio from the video
@@ -165,4 +169,7 @@ def createTranslatedAV(videopath, source_lang, target_langs):
     return final_path
 
 
-createTranslatedAV("../videos/python.mp4", "en", ["hi"])
+# createTranslatedAV(os.path.abspath("../videos/heavy.mp4"), "en", ["hi"])
+
+if __name__ == "__main__":
+    createTranslatedAV(sys.argv[1], sys.argv[2], [sys.argv[3]])
