@@ -4,29 +4,30 @@ import numpy as np
 import os
 from PIL import Image, ImageDraw, ImageFont
 from googletrans import Translator
+import deepl
+
+def translate_text_deepl(text, source, target):
+    deepl_api_key = os.getenv('DEEPL_API_KEY')
+    translator = deepl.Translator('16f7a326-13d2-42df-b379-3c6b56c0acd7:fx')
+
+    sources = ["BG", "CS", "DA", "DE", "EL", "EN", "ES", "ET", "FI", "FR", "HU", "ID", "IT", "JA", "KO", "LT", "LV", "NB", "NL", "PL", "PT", "RO", "RU", "SK", "SL", "SV", "TR", "UK", "ZH"]
+    targets = ["BG", "CS", "DA", "DE", "EL", "EN-GB", "EN-US", "ES", "ET", "FI", "FR", "HU", "ID", "IT", "JA", "KO", "LT", "LV", "NB", "NL", "PL", "PT-BR", "PT-PT", "RO", "RU", "SK", "SL", "SV", "TR", "UK", "ZH"]
+    if source not in sources:
+        return False
+    if target not in targets:
+        return False
+    result = translator.translate_text(text, source_lang=source, target_lang=target)
+    if type(text) is list:
+        return [r.text for r in result]
+    else:
+        return str(result.text)
 
 
-# import deepl
-# deepl_api_key = os.getenv('DEEPL_API_KEY')
-# translator = deepl.Translator('16f7a326-13d2-42df-b379-3c6b56c0acd7:fx')
-
-# def translate(text, source, target):
-#     sources = ["BG", "CS", "DA", "DE", "EL", "EN", "ES", "ET", "FI", "FR", "HU", "ID", "IT", "JA", "KO", "LT", "LV", "NB", "NL", "PL", "PT", "RO", "RU", "SK", "SL", "SV", "TR", "UK", "ZH"]
-#     targets = ["BG", "CS", "DA", "DE", "EL", "EN-GB", "EN-US", "ES", "ET", "FI", "FR", "HU", "ID", "IT", "JA", "KO", "LT", "LV", "NB", "NL", "PL", "PT-BR", "PT-PT", "RO", "RU", "SK", "SL", "SV", "TR", "UK", "ZH"]
-#     if source not in sources:
-#         return False
-#     if target not in targets:
-#         return False
-#     result = translator.translate_text(text, source_lang=source, target_lang=target)
-#     if type(text) is list:
-#         return [r.text for r in result]
-#     else:
-#         return str(result.text)
-
-
-def translate_text(text,sourcelang,targetlang):
+def translate_text_google(text,sourcelang,targetlang):
     translator = Translator()
-    translated_text = translator.translate(text, src=sourcelang, dest=targetlang)
+    src_low = sourcelang.lower()
+    target_low = targetlang.lower()
+    translated_text = translator.translate(text, src=src_low, dest=target_low)
     return translated_text.text
 
 
@@ -61,7 +62,6 @@ def translate_video(input_path, source_lang, target_lang, mode, GPU=False):
         print("Error: Couldn't open the video file")
         exit()
 
-    font_path = "Arial.ttf"
     frame_count = 0
     previous_frame = None
     previous_translated_frame = None
@@ -105,7 +105,13 @@ def translate_video(input_path, source_lang, target_lang, mode, GPU=False):
             if (text == ''):
                 continue
             else:
-                text1 = translate_text(str(text),source_lang,target_lang)
+                if(target_lang in ['HI','GU','MR','TA']):
+                    text1 = translate_text_google(str(text),source_lang,target_lang)
+                    
+                else:
+
+                    text1 = translate_text_deepl(str(text),source_lang,target_lang)
+
             font = ImageFont.truetype(font_path, font_size)
             draw.text((top_left[0], top_left[1]), text1, font=font, fill=(
                 255-bg_color[0], 255-bg_color[1], 255-bg_color[2]))
@@ -120,4 +126,4 @@ def translate_video(input_path, source_lang, target_lang, mode, GPU=False):
     out.release()   
     cv2.destroyAllWindows()
 
-translate_video('french2.mp4', 'fr', 'gu', 3,True)
+translate_video('french.mp4', 'FR', 'TA', 3,True)
