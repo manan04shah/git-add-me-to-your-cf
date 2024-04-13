@@ -22,7 +22,7 @@ def translate(text, source, target):
         return str(result.text)
 
 
-def translate_video(input_path,source_lang , target_lang, mode):
+def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
 
     mode = int(mode)
     if mode == 0:
@@ -47,7 +47,7 @@ def translate_video(input_path,source_lang , target_lang, mode):
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
-    reader = easyocr.Reader(['en','fr','es','de'], gpu=True)
+    reader = easyocr.Reader(['en','fr','es','de'], gpu=GPU)
 
     if not cap.isOpened():
         print("Error: Couldn't open the video file")
@@ -102,4 +102,4 @@ def translate_video(input_path,source_lang , target_lang, mode):
     out.release()
     cv2.destroyAllWindows()
 
-translate_video('french2.mp4', 'FR', 'EN-GB', 2)
+translate_video('french2.mp4', 'FR', 'EN-GB', 2,True)
