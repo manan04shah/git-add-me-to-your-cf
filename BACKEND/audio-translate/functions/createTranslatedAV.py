@@ -1,6 +1,5 @@
 import createTTSFiles as ttscreate
 from moviepy.editor import *
-from pydub import AudioSegment
 import os
 
 
@@ -23,17 +22,6 @@ def add_duration_to_audio_list(audio_list):
     return audio_list
 
 def split_video_with_audio_clips(video_path, audio_clips_data):
-    """
-    Split a video into multiple short clips based on the provided audio clips data.
-
-    Args:
-        video_path (str): The path to the video file.
-        audio_clips_data (list): A list of dictionaries containing the file path,
-                                 start time, duration, and end time for each audio clip.
-
-    Returns:
-        None
-    """
     # Load the video
     video = VideoFileClip(video_path)
     total_duration = video.duration
@@ -51,24 +39,14 @@ def split_video_with_audio_clips(video_path, audio_clips_data):
         clips.append(clip)
     
     for i in range(len(clips)):
-        clips[i].write_videofile(f"videofiles\\output{i}.mp4")
-        videoclips.append(f"videofiles\\output{i}.mp4")
+        clips[i].write_videofile(f"../videofiles\\output{i}.mp4")
+        videoclips.append(f"../videofiles\\output{i}.mp4")
 
     video.close()
 
     return videoclips
 
 def add_dummy_audio_fillers(audio_clips_data, dummy_audio_path):
-    """
-    Add dummy audio files as fillers between the end time of one clip and the start time of the next clip.
-
-    Args:
-        audio_clips_data (list): A list of dictionaries containing the file path, start time, duration, and end time for each audio clip.
-        dummy_audio_path (str): The path to the dummy audio file to be used as a filler.
-
-    Returns:
-        list: A new list of dictionaries containing the original audio clips and the dummy audio fillers.
-    """
     # Sort the audio clips data by start time
     audio_clips_data.sort(key=lambda x: x['start_time'])
 
@@ -105,7 +83,7 @@ def add_dummy_audio_fillers(audio_clips_data, dummy_audio_path):
 def combine_subclips(audio_files, video_files):
     combined_clips = []
     for i, audio_file in enumerate(audio_files):
-        if(audio_file["file"] != "dummy_audio.wav"):
+        if(audio_file["file"] != "../audiofiles/dummy_audio.wav"):
             audio = AudioFileClip(audio_file["file"])
             video = VideoFileClip(video_files[i])
             video = video.set_audio(audio)
@@ -118,28 +96,27 @@ def combine_subclips(audio_files, video_files):
     
     #Write each clip to a new video file
     for i, clip in enumerate(combined_clips):
-        clip.write_videofile(f"combinedfiles\\output{i}.mp4")
+        clip.write_videofile(f"../combinedfiles\\output{i}.mp4")
 
     return combined_clips
 
 def make_final_compilation(combined_clips):
     final_clip = concatenate_videoclips(combined_clips)
-    final_clip.write_videofile("final_output.mp4")
+    final_clip.write_videofile("../finaloutput/final-output.mp4")
     return final_clip
 
 def createTranslatedAV(videopath, source_lang, target_langs):
     #Delete everything in combinedfiles, videofiles, audiofiles
-    for file in os.listdir("combinedfiles"):
-        os.remove(f"combinedfiles\\{file}")
-    for file in os.listdir("videofiles"):
-        os.remove(f"videofiles\\{file}")
-    for file in os.listdir("audiofiles"):
-        os.remove(f"audiofiles\\{file}")
+    for file in os.listdir("../combinedfiles"):
+        os.remove(f"../combinedfiles\\{file}")
+    for file in os.listdir("../videofiles"):
+        os.remove(f"../videofiles\\{file}")
+    for file in os.listdir("../audiofiles"):
+        os.remove(f"../audiofiles\\{file}")
     
-    os.remove("extracted_audio.wav")
 
     # Extracting the audio from the video
-    destination_path = "extracted_audio.wav"
+    destination_path = "../audiofiles/extracted_audio.wav"
     video = VideoFileClip(videopath)
     audio = video.audio
     audio.write_audiofile(destination_path)
@@ -158,7 +135,7 @@ def createTranslatedAV(videopath, source_lang, target_langs):
     # print(audio_list)
 
     #Add filler audios
-    dummy_audio_path = "dummy_audio.wav"
+    dummy_audio_path = "../audiofiles/dummy_audio.wav"
     dummy_audio_list = add_dummy_audio_fillers(audio_list, dummy_audio_path)
     print("Dummy audio added successfully.")
     print(dummy_audio_list)
@@ -185,4 +162,4 @@ def createTranslatedAV(videopath, source_lang, target_langs):
     print("Your translated video is ready in final_output.mp4.")
 
 
-createTranslatedAV("python.mp4", "en", ["ja"])
+createTranslatedAV("../videos/python.mp4", "en", ["hi"])
