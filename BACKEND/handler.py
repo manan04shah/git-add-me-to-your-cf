@@ -31,22 +31,22 @@ def translate_text_google(text,sourcelang,targetlang):
     return translated_text.text
 
 
-def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
+def translate_video(input_path, source_lang, target_lang, mode, GPU=False):
 
     mode = int(mode)
     if mode == 0:
-        scale_factor = 1 # 60 fps -> 60 fps , retain all frames
+        scale_factor = 1  # 60 fps -> 60 fps , retain all frames
     elif mode == 1:
-        scale_factor = 0.1 # 60 fps -> 6 fps , retain 1 frame every 10 frames
+        scale_factor = 0.1  # 60 fps -> 6 fps , retain 1 frame every 10 frames
     elif mode == 2:
         scale_factor = 0.05  # 60 fps -> 3 fps , retain 1 frame every 20 frames
     elif mode == 3:
-        scale_factor = 0.01 # 60 fps -> 1 fps , retain 1 frame every 60 frames
+        scale_factor = 0.01  # 60 fps -> 1 fps , retain 1 frame every 60 frames
     else:
         print("Error: Invalid mode")
         exit()
-    
-    start_time = 120000 + 17000
+
+    start_time = 0
     skip_frames = int(1 / scale_factor)
     video_path = os.path.abspath(input_path)
     cap = cv2.VideoCapture(video_path)
@@ -56,9 +56,7 @@ def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     out = cv2.VideoWriter(out_path, fourcc, fps, (width, height))
-    reader = easyocr.Reader(['en','fr','es','de'], gpu=GPU)
-    font_path = "arial-unicode-ms.ttf"
-
+    reader = easyocr.Reader(['en', 'fr', 'es', 'de'], gpu=GPU)
 
     if not cap.isOpened():
         print("Error: Couldn't open the video file")
@@ -94,15 +92,17 @@ def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
         for detection in result:
             top_left = tuple(map(int, detection[0][0]))
             bottom_right = tuple(map(int, detection[0][2]))
-            bg_color = np.mean(frame[top_left[1]-1:top_left[1]+1, bottom_right[0]:bottom_right[0]+1], axis=(0, 1))
+            bg_color = np.mean(
+                frame[top_left[1]-1:top_left[1]+1, bottom_right[0]:bottom_right[0]+1], axis=(0, 1))
             bg_color = tuple(map(int, bg_color))
-            cv2.rectangle(translated_frame, top_left, bottom_right, bg_color, -1)
+            cv2.rectangle(translated_frame, top_left,
+                          bottom_right, bg_color, -1)
             pil_image = Image.fromarray(translated_frame)
             text_height = bottom_right[1] - top_left[1]
             font_size = int(text_height / 2)
             draw = ImageDraw.Draw(pil_image)
             text = detection[1]
-            if(text == ''):
+            if (text == ''):
                 continue
             else:
                 if(target_lang in ['HI','GU','MR','TA']):
@@ -113,7 +113,8 @@ def translate_video(input_path,source_lang , target_lang, mode, GPU=False):
                     text1 = translate_text_deepl(str(text),source_lang,target_lang)
 
             font = ImageFont.truetype(font_path, font_size)
-            draw.text((top_left[0], top_left[1]), text1, font=font, fill=(255-bg_color[0], 255-bg_color[1], 255-bg_color[2]))
+            draw.text((top_left[0], top_left[1]), text1, font=font, fill=(
+                255-bg_color[0], 255-bg_color[1], 255-bg_color[2]))
             translated_frame = np.array(pil_image)
         out.write(translated_frame)
         previous_translated_frame = translated_frame.copy()
