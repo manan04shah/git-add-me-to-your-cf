@@ -101,6 +101,8 @@ def translate_video(input_path, source_lang, target_lang, mode, GPU=False):
             pil_image = Image.fromarray(translated_frame)
             text_height = bottom_right[1] - top_left[1]
             font_size = int(text_height / 2)
+            if(font_size <= 0):
+                font_size = 1
             draw = ImageDraw.Draw(pil_image)
             text = detection[1]
             if (text == ''):

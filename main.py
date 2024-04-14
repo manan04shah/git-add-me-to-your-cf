@@ -107,8 +107,15 @@ async def translate_av(source_lang: str, target_lang: str, mode: int, videofile:
 
     output_filepath = os.path.abspath("/home/a7x/Projects/git-add-me-to-your-cf-backend/git-add-me-to-your-cf/BACKEND/audiotranslate/finaloutput/final-output.mp4")
 
+    source_lang_small = source_lang.lower()
+    target_lang_small = target_lang.lower()
+    if(source_lang_small == "en-gb"):
+        source_lang_small = "en"
+    if(target_lang_small == "en-gb"):
+        target_lang_small = "en"
+
     #Run the createAV function
-    print(os.system(f"cd BACKEND/audiotranslate/functions && python3 createTranslatedAV.py {filepath} {source_lang} {target_lang}"))
+    print(os.system(f"cd BACKEND/audiotranslate/functions && python3 createTranslatedAV.py {filepath} {source_lang_small} {target_lang_small}"))
     
     # Open the final output file
     translated_audio = AudioFileClip(output_filepath)
