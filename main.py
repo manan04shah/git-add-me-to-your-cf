@@ -12,7 +12,7 @@ import dropbox
 import sys
 sys.path.append('BACKEND')
 
-DROPBOX_API_KEY = "sl.BzU1JJ1VcttI7jjlWeqQaURN41XmddmWwDTxzKHeCLhGpsXQ3g6c1XsQTKaT-2fx853Tk0DL5PHgAsWDJ25Omaa0mQY-LaIXWsXrNTCWrpUGX3ScklltZ4a5lp57faEaQUS8S0a941n4Fs0bPN57ZgM"
+DROPBOX_API_KEY = os.getenv("DROPBOX_API_KEY")
 
 app = FastAPI()
 
